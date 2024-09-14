@@ -20,12 +20,13 @@ SONG_FOLDER = os.getenv("SONG_FOLDER")
 
 def load_lyrics(file_path):
     lyrics = []
-    with open(file_path, "r", encoding="utf-8") as file:
-        reader = csv.DictReader(file)
+    with open(file_path, "r", newline="", encoding="utf-8") as file:
+        reader = csv.reader(file, delimiter="\t")
+
         for row in reader:
-            start_time = int(row["start"]) if row["start"].isdigit() else 0
-            end_time = int(row["end"]) if row["end"].isdigit() else 0
-            text = row["text"]
+            start_time = int(row[0]) if row[0].isdigit() else 0
+            end_time = int(row[1]) if row[1].isdigit() else 0
+            text = row[2]
             lyrics.append((start_time, end_time, text))
     return lyrics
 
@@ -61,3 +62,5 @@ while pygame.mixer.music.get_busy():
     time.sleep(1)
 
 print("Song finished!")
+
+# curl -F "audio=@music/probably_up/vocals.mp3" -F "transcript=@music/probably_up/lyrics/lyrics.txt" "http://localhost:8765/transcriptions?async=false"
