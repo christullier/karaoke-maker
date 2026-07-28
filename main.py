@@ -10,8 +10,12 @@ import csv
 import os
 import time
 
+import matplotlib.pyplot as plt
+import numpy as np
 import pygame
 from dotenv import load_dotenv
+from matplotlib.animation import FuncAnimation
+from pydub import AudioSegment
 
 load_dotenv()
 
@@ -47,6 +51,48 @@ def display_lyrics_in_time(lyrics):
 # Initialize pygame mixer for audio playback
 pygame.mixer.init()
 
+
+# Initialize pygame mixer
+pygame.mixer.init()
+
+# Load the song and play it
+audio_file = f"{SONG_FOLDER}/vocals.mp3"
+pygame.mixer.music.load(audio_file)
+pygame.mixer.music.play()
+
+# Load the MP3 file using pydub
+audio = AudioSegment.from_mp3(audio_file)
+
+# Get raw data as a bytestring
+raw_data = np.array(audio.get_array_of_samples())
+
+# Calculate time values for the x-axis
+time = np.linspace(0, len(raw_data) / audio.frame_rate, num=len(raw_data))
+
+# Initialize the plot
+fig, ax = plt.subplots(figsize=(10, 4))
+ax.plot(time, raw_data, label="Waveform")
+ax.set_title("Waveform of vocals.mp3")
+ax.set_ylabel("Amplitude")
+ax.set_xlabel("Time (seconds)")
+line = ax.axvline(0, color="r")  # Moving bar (initial position at 0 seconds)
+
+
+# Function to update the position of the bar
+def update(frame):
+    # Get the current time of the song in seconds
+    current_time = pygame.mixer.music.get_pos() / 1000  # in seconds
+
+    # Update the position of the vertical line (bar)
+    line.set_xdata(current_time)
+
+    return (line,)
+
+
+# Animate the bar
+ani = FuncAnimation(fig, update, blit=True, interval=100)
+
+plt.show()
 # Load and play the song
 pygame.mixer.music.load(f"{SONG_FOLDER}/vocals.mp3")
 pygame.mixer.music.play()
